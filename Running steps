@@ -1,3 +1,4 @@
 open terminal
+pip install transformers
 type uvicorn app:app -reload 
 click on host link
