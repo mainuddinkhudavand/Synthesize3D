@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthesize3D - Advanced Dialogue Summarizer</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0b12;
+            --card-bg: rgba(18, 18, 30, 0.55);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-purple: #a855f7;
+            --accent-cyan: #06b6d4;
+            --accent-indigo: #6366f1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* 3D Floating Neon Background Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            pointer-events: none;
+            animation: float 20s ease-in-out infinite alternate;
+        }
+
+        .orb-1 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, var(--accent-indigo) 0%, transparent 70%);
+            top: -100px;
+            left: -100px;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            50% {
+                transform: translate(50px, 30px) scale(1.1);
+            }
+            100% {
+                transform: translate(-20px, -50px) scale(0.9);
+            }
+        }
+
+        /* Container Layout */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Header Styling with 3D shadow and gradient */
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+            perspective: 800px;
+        }
+
+        .title-3d {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 30%, #a855f7 70%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.5));
+            transform: translateZ(20px);
+            display: inline-block;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 300;
+        }
+
+        /* Main Workspace: 2 Column Layout with 3D Perspective */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            perspective: 1500px;
+        }
+
+        @media (max-width: 900px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tilt Card Glassmorphic container */
+        .tilt-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tilt-card:hover {
+            box-shadow: 0 30px 60px rgba(99, 102, 241, 0.15), 
+                        0 20px 40px rgba(0, 0, 0, 0.5), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transform: translateZ(30px);
+        }
+
+        .card-title span.accent-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-indigo);
+            box-shadow: 0 0 10px var(--accent-indigo);
+        }
+
+        .input-card .card-title span.accent-dot {
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        /* Form elements */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateZ(25px);
+            height: 100%;
+        }
+
+        .textarea-container {
+            position: relative;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .textarea-container:focus-within {
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 220px;
+            background: transparent;
+            border: none;
+            outline: none;
+            padding: 16px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        /* Count indicators and quick tools inside textarea footer */
+        .textarea-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .action-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .action-link:hover {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+        }
+
+        /* 3D Primary Button Class */
+        .btn-3d {
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            transform: translateZ(35px);
+            margin-top: 10px;
+        }
+
+        .btn-3d-shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            background: hsl(0deg 0% 0% / 0.5);
+            transform: translateY(6px);
+            transition: transform 250ms cubic-bezier(.3, .7, .4, 1);
+        }
+
+        .btn-3d-edge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            background: linear-gradient(
+                to left,
+                #4f46e5 0%,
+                #7c3aed 100%
+            );
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+        }
+
+        .btn-3d-front {
+            display: block;
+            position: relative;
+            padding: 16px;
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: white;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            transform: translateY(-6px);
+            transition: transform 250ms cubic-bezier(.3, .7, .4, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-3d:hover .btn-3d-front {
+            transform: translateY(-8px);
+            background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+        }
+
+        .btn-3d:hover .btn-3d-shadow {
+            transform: translateY(8px);
+        }
+
+        .btn-3d:active .btn-3d-front {
+            transform: translateY(-2px);
+            transition: transform 34ms;
+        }
+
+        .btn-3d:active .btn-3d-shadow {
+            transform: translateY(2px);
+            transition: transform 34ms;
+        }
+
+        .btn-3d:disabled {
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .btn-3d:disabled .btn-3d-front {
+            background: #374151;
+            color: #9ca3af;
+            transform: translateY(0);
+        }
+
+        .btn-3d:disabled .btn-3d-shadow {
+            transform: translateY(0);
+        }
+
+        /* Preset/Quick Sample Dialogues */
+        .samples {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transform: translateZ(20px);
+        }
+
+        .samples-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sample-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sample-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sample-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--accent-cyan);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Output Card Styling */
+        .output-card {
+            min-height: 400px;
+            position: relative;
+        }
+
+        .output-content {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #e5e7eb;
+            white-space: pre-wrap;
+            flex-grow: 1;
+            min-height: 220px;
+            transform: translateZ(25px);
+            position: relative;
+        }
+
+        .placeholder-text {
+            color: var(--text-muted);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        /* Output utilities (copy/download) */
+        .output-actions {
+            display: flex;
+            gap: 12px;
+            transform: translateZ(30px);
+        }
+
+        /* Small 3D button for utilities */
+        .btn-3d-secondary {
+            position: relative;
+            background: transparent;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            outline: none;
+            flex: 1;
+        }
+
+        .btn-3d-secondary .btn-3d-shadow {
+            background: hsl(0deg 0% 0% / 0.4);
+            border-radius: 12px;
+            transform: translateY(4px);
+        }
+
+        .btn-3d-secondary .btn-3d-edge {
+            background: linear-gradient(to left, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.15) 100%);
+            border-radius: 12px;
+            box-shadow: none;
+        }
+
+        .btn-3d-secondary .btn-3d-front {
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 100%);
+            transform: translateY(-4px);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-3d-secondary:hover .btn-3d-front {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.12) 100%);
+            color: #ffffff;
+        }
+
+        .btn-3d-secondary:hover .btn-3d-shadow {
+            transform: translateY(5px);
+        }
+
+        .btn-3d-secondary:active .btn-3d-front {
+            transform: translateY(-2px);
+        }
+
+        .btn-3d-secondary:active .btn-3d-shadow {
+            transform: translateY(2px);
+        }
+
+        .btn-3d-secondary:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        /* 3D Loading Spinner Container */
+        .loader-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 11, 18, 0.85);
+            backdrop-filter: blur(8px);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .loader-wrapper.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Isometric 3D Loader */
+        .loader-3d {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            transform: rotateX(60deg) rotateZ(45deg);
+            transform-style: preserve-3d;
+        }
+
+        .loader-cube {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--accent-indigo);
+            animation: cubePulse 1.5s ease-in-out infinite alternate;
+            transform-style: preserve-3d;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+        }
+
+        @keyframes cubePulse {
+            0% {
+                transform: translateZ(10px) scale(0.8);
+                background: var(--accent-cyan);
+                box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+            }
+            100% {
+                transform: translateZ(40px) scale(1.1);
+                background: var(--accent-purple);
+                box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+            }
+        }
+
+        .loader-cube::before, .loader-cube::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Cube Left Side */
+        .loader-cube::before {
+            background: rgba(0, 0, 0, 0.2);
+            transform: rotateY(-90deg) translateZ(0px);
+            transform-origin: left;
+            top: 0;
+            left: 0;
+        }
+
+        /* Cube Right Side */
+        .loader-cube::after {
+            background: rgba(0, 0, 0, 0.4);
+            transform: rotateX(-90deg) translateZ(-40px);
+            transform-origin: bottom;
+            bottom: 0;
+            left: 0;
+        }
+
+        .loader-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            animation: textPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes textPulse {
+            0% { opacity: 0.5; color: var(--accent-cyan); }
+            100% { opacity: 1; color: var(--accent-purple); }
+        }
+
+        /* Tooltip notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(6, 182, 212, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* SVG Icon styling */
+        .icon {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 40px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+            z-index: 1;
+        }
+        
+        /* 3D Grid Effect on Background */
+        .bg-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -2;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Grid and Floating Orbs -->
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="title-3d">Synthesize3D</h1>
+            <p class="subtitle">Deep learning dialogue summarization in three dimensions</p>
+        </header>
+
+        <main class="workspace">
+            <!-- Left Card: Input Panel -->
+            <div class="tilt-card input-card">
+                <h2 class="card-title">
+                    <span class="accent-dot"></span>
+                    Source Dialogue
+                </h2>
+                
+                <form id="summarization-form">
+                    <div class="textarea-container">
+                        <textarea id="dialogue-input" placeholder="Type, paste, or select a sample dialogue to summarize..." required></textarea>
+                        <div class="textarea-footer">
+                            <span id="char-word-counter">0 chars / 0 words</span>
+                            <span class="action-link" id="clear-btn">Clear Workspace</span>
+                        </div>
+                    </div>
+
+                    <!-- Presets -->
+                    <div class="samples">
+                        <span class="samples-label">Quick Sample Dialogue Presets</span>
+                        <div class="sample-buttons">
+                            <button type="button" class="sample-btn" onclick="loadSample('support')">Customer Support</button>
+                            <button type="button" class="sample-btn" onclick="loadSample('meeting')">Business Meeting</button>
+                            <button type="button" class="sample-btn" onclick="loadSample('tech')">Technical Chat</button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Summarize Button -->
+                    <button type="submit" class="btn-3d" id="submit-btn">
+                        <span class="btn-3d-shadow"></span>
+                        <span class="btn-3d-edge"></span>
+                        <span class="btn-3d-front">Summarize Dialogue</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right Card: Output Panel -->
+            <div class="tilt-card output-card">
+                <h2 class="card-title">
+                    <span class="accent-dot"></span>
+                    Content Summary
+                </h2>
+
+                <!-- Custom 3D Loader -->
+                <div class="loader-wrapper" id="loader-wrapper">
+                    <div class="loader-3d">
+                        <div class="loader-cube"></div>
+                    </div>
+                    <div class="loader-text" id="loader-text">Reading Dialogue...</div>
+                </div>
+
+                <div class="output-content" id="output-box">
+                    <div class="placeholder-text" id="placeholder-box">
+                        Your generated summary will appear in this space. Click "Summarize Dialogue" above to begin.
+                    </div>
+                    <p id="summary-text" style="display: none;"></p>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="output-actions">
+                    <button type="button" class="btn-3d-secondary" id="copy-btn" disabled>
+                        <span class="btn-3d-shadow"></span>
+                        <span class="btn-3d-edge"></span>
+                        <span class="btn-3d-front">
+                            <!-- Copy icon -->
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                            Copy
+                        </span>
+                    </button>
+                    <button type="button" class="btn-3d-secondary" id="download-btn" disabled>
+                        <span class="btn-3d-shadow"></span>
+                        <span class="btn-3d-edge"></span>
+                        <span class="btn-3d-front">
+                            <!-- Download icon -->
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+                            Download
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Synthesize3D. Powered by HuggingFace Transformers & PyTorch.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast-notify">Copied to clipboard!</div>
+
+    <script>
+        // Preset Dialogues Data
+        const SAMPLES = {
+            support: `Customer: Hello, I received my order today but the screen is cracked. Can I get a replacement?
+Agent: I'm very sorry to hear that. Could you please provide your order ID?
+Customer: Yes, it's #ORD-99821.
+Agent: Thank you. I have initiated a replacement. It will ship tomorrow and you'll receive a tracking email shortly.
+Customer: Great, thanks for the quick help!`,
+            
+            meeting: `Sarah: We need to finalize the launch date for the new mobile app. Any suggestions?
+Alex: I think mid-July gives us enough time for beta testing. Maybe July 15th?
+Sarah: Sounds reasonable. Let's check with the development team first.
+Mark: Development is on track. July 15th works for us.
+Sarah: Perfect. I'll prepare the marketing plan accordingly.`,
+            
+            tech: `Dev1: Are we still seeing memory leaks in the production build?
+Dev2: Yes, it seems the socket connections aren't being closed properly in the API client.
+Dev1: Ah, we missed calling client.close() in the finally block. Let's patch that immediately.
+Dev2: I'll create a PR and run the test suite. If it passes, we can deploy a hotfix in 10 minutes.`
+        };
+
+        // Load Sample text helper
+        function loadSample(key) {
+            const textarea = document.getElementById("dialogue-input");
+            textarea.value = SAMPLES[key] || "";
+            updateCounter();
+        }
+
+        // Live text counters
+        const textarea = document.getElementById("dialogue-input");
+        const counterText = document.getElementById("char-word-counter");
+
+        function updateCounter() {
+            const val = textarea.value;
+            const chars = val.length;
+            const words = val.trim() === "" ? 0 : val.trim().split(/\s+/).length;
+            counterText.innerText = `${chars} chars / ${words} words`;
+        }
+
+        textarea.addEventListener("input", updateCounter);
+
+        // Clear Workspace button
+        document.getElementById("clear-btn").addEventListener("click", () => {
+            textarea.value = "";
+            updateCounter();
+            textarea.focus();
+        });
+
+        // 3D Card Tilt Interaction
+        const cards = document.querySelectorAll('.tilt-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const xc = rect.width / 2;
+                const yc = rect.height / 2;
+                
+                const dx = x - xc;
+                const dy = y - yc;
+                
+                // Tilt logic: 5 degrees max
+                const tiltX = -(dy / yc) * 5;
+                const tiltY = (dx / xc) * 5;
+                
+                card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(0)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)`;
+            });
+        });
+
+        // Loader messages rotator
+        let loaderTimer;
+        const loaderPhrases = [
+            "Initializing deep model...",
+            "Reading input dialogue...",
+            "Analyzing semantic relationships...",
+            "Running T5 transformer beams...",
+            "Synthesizing summary...",
+            "Refining final summary text..."
+        ];
+
+        function startLoaderRotation() {
+            const loaderText = document.getElementById("loader-text");
+            let idx = 0;
+            loaderText.innerText = loaderPhrases[idx];
+            loaderTimer = setInterval(() => {
+                idx = (idx + 1) % loaderPhrases.length;
+                loaderText.innerText = loaderPhrases[idx];
+            }, 3000);
+        }
+
+        function stopLoaderRotation() {
+            clearInterval(loaderTimer);
+        }
+
+        // Form Submit & Summarization API Call
+        document.getElementById("summarization-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+        
+            const dialogueInput = document.getElementById("dialogue-input");
+            const summaryText = document.getElementById("summary-text");
+            const placeholderBox = document.getElementById("placeholder-box");
+            const submitButton = document.getElementById("submit-btn");
+            const loaderWrapper = document.getElementById("loader-wrapper");
+            
+            const copyBtn = document.getElementById("copy-btn");
+            const downloadBtn = document.getElementById("download-btn");
+        
+            const dialogue = dialogueInput.value.trim();
+            if (!dialogue) return;
+        
+            // Enable loading state
+            loaderWrapper.classList.add("active");
+            startLoaderRotation();
+            submitButton.disabled = true;
+            
+            // Clear past results
+            summaryText.style.display = "none";
+            placeholderBox.style.display = "block";
+            copyBtn.disabled = true;
+            downloadBtn.disabled = true;
+        
+            try {
+                const response = await fetch("/summarize/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ dialogue }),
+                });
+        
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+        
+                const data = await response.json();
+                
+                placeholderBox.style.display = "none";
+                summaryText.style.display = "block";
+                summaryText.innerText = data.summary || "No summary was generated.";
+                
+                // Enable secondary tools
+                copyBtn.disabled = false;
+                downloadBtn.disabled = false;
+            } catch (err) {
+                placeholderBox.style.display = "none";
+                summaryText.style.display = "block";
+                summaryText.innerHTML = `<span style="color: #ef4444; font-weight: 600;">Error:</span> ${err.message}. Please verify the backend is running.`;
+            } finally {
+                loaderWrapper.classList.remove("active");
+                stopLoaderRotation();
+                submitButton.disabled = false;
+            }
+        });
+
+        // Copy summary to clipboard
+        const copyBtn = document.getElementById("copy-btn");
+        copyBtn.addEventListener("click", () => {
+            const summaryVal = document.getElementById("summary-text").innerText;
+            if (!summaryVal) return;
+
+            navigator.clipboard.writeText(summaryVal).then(() => {
+                showToast("Copied to clipboard!");
+            }).catch(err => {
+                showToast("Failed to copy text.");
+            });
+        });
+
+        // Download summary as TXT
+        const downloadBtn = document.getElementById("download-btn");
+        downloadBtn.addEventListener("click", () => {
+            const summaryVal = document.getElementById("summary-text").innerText;
+            if (!summaryVal) return;
+
+            const element = document.createElement("a");
+            const file = new Blob([summaryVal], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = "synthesize3d-summary.txt";
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            showToast("Download started!");
+        });
+
+        // Toast feedback notifier
+        function showToast(message) {
+            const toast = document.getElementById("toast-notify");
+            toast.innerText = message;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
